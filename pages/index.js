@@ -1,7 +1,7 @@
 import styles from "../styles/Home.module.css";
 import { getPermit, FhenixClient } from "fhenixjs";
 // use BrowserProvider if you need a signer
-import { JsonRpcProvider } from "ethers";
+import { JsonRpcProvider, BrowserProvider } from "ethers";
 
 import { useEffect, useState } from "react";
 
@@ -12,8 +12,7 @@ export default function Home() {
   const [encrypted, setEncrypted] = useState(null);
 
   useEffect(() => {
-    //setProvider(new BrowserProvider(window.ethereum))
-    setProvider(new JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL));
+    setProvider(new BrowserProvider(window.ethereum))
   }, []);
 
   const getPermitHandle = async () => {
@@ -25,7 +24,6 @@ export default function Home() {
 
     const permit = await getPermit(contractAddress, provider);
 
-    //console.log(permit);
     setPermit(permit);
   };
 
@@ -38,18 +36,27 @@ export default function Home() {
   }
 
 
-  function buf2hex(buffer) { // buffer is an ArrayBuffer
+  function buf2hex(buffer) {
     return [...new Uint8Array(buffer)]
         .map(x => x.toString(16).padStart(2, '0'))
         .join('');
   }
 
+  function shortAddress(address) {
+    return `${address.slice(0, 10)}...${address.slice(-8)}`;
+  }
+
+  console.log(permit);
+
   return (
     <div className={styles.container}>
       <button className={"getencrypt"} onClick={encryptTest} id="getencrypt">Encrypt</button>
       {encrypted && <div className={"encrypted"}>{encrypted}</div>}
-      {/*<button onClick={getPermitHandle} id={"getpermit"}>Encrypt</button>*/}
-      {/*{permit && <div id={"permit"}>{permit}</div>}*/}
+      <button onClick={getPermitHandle} id={"getpermit"}>Get Permit </button>
+      {permit && <div id={"permit"}> Contract Address {shortAddress(permit.contractAddress)}</div>}
+      {permit && <div id={"permit"}> Public Key {shortAddress(permit.publicKey)}</div>}
+      {permit && <div id={"permit"}> Signature {shortAddress(permit.signature)}</div>}
+
     </div>
   );
 }
